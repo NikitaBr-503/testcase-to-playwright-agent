@@ -1,0 +1,59 @@
+# Конфігурація основного експерименту.
+# Experiment configuration. Values marked TODO must be filled in before the run.
+
+experiment:
+  name: main                 # results go to results/<name>/
+  modes: [R1, R2, R3]
+  max_iterations: 5          # K – maximum test runs in mode R3 (article, section 4.5)
+  repeats: 3                 # repetitions of every test case × mode × model combination
+  stability_runs: 3          # a passing test must pass this many consecutive runs
+  testcases_dir: testcases
+
+playwright:
+  test_timeout_ms: 60000
+  action_timeout_ms: 10000
+  expect_timeout_ms: 5000
+
+models:
+  # TODO: choose two models (article, section 4.6) and put the exact model IDs here.
+  - id: model1                     # short name used in results and tables
+    provider: anthropic            # anthropic | openai_compatible | fake
+    model: TODO-model-id
+    api_key_env: ANTHROPIC_API_KEY
+    temperature: 0
+    max_tokens: 8000
+    vision: true                   # send the failure screenshot in mode R3
+  - id: model2
+    provider: openai_compatible    # OpenAI, OpenRouter, Ollama, vLLM, LM Studio …
+    base_url: https://openrouter.ai/api/v1   # for Ollama: http://localhost:11434/v1
+    model: TODO-model-id
+    api_key_env: OPENROUTER_API_KEY          # leave empty for a local server without a key
+    temperature: 0
+    max_tokens: 8000
+    vision: false
+
+apps:
+  # base_url – where the application runs locally (see apps/README.md)
+  # reset_cmd – shell command that restores the initial data before every test run (optional)
+  # context – facts a tester would know: test accounts, seed data. Passed to the model.
+  todomvc:
+    base_url: http://localhost:8080          # TODO: check after deployment
+    start_path: /
+    reset_cmd: null
+    context: |
+      The application keeps its data in the browser's localStorage, so every test starts with an empty list.
+  conduit:
+    base_url: http://localhost:4100          # TODO: check after deployment
+    start_path: /
+    reset_cmd: null                          # TODO: e.g. a script that recreates the database
+    context: |
+      Registered test user (create it once before the experiment):
+      username: qa_user, email: qa_user@example.com, password: QaPassword123
+  juice-shop:
+    base_url: http://localhost:3000
+    start_path: /
+    reset_cmd: docker compose -f apps/docker-compose.yml restart juice-shop && sleep 15
+    context: |
+      On the first visit the application shows a welcome dialog and a cookie banner; they must be dismissed.
+      Registered test user (create it once before the experiment):
+      email: qa_user@example.com, password: QaPassword123!, security answer: Kyiv

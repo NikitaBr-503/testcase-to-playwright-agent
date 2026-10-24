@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Shopping list</title>
+</head>
+<body>
+  <main>
+    <h1>Shopping list</h1>
+    <form id="add-form">
+      <label for="item">New item</label>
+      <input id="item" name="item" autocomplete="off">
+      <button type="submit">Add</button>
+    </form>
+    <ul aria-label="Items" id="items"></ul>
+    <p role="status" id="count">0 items</p>
+  </main>
+  <script>
+    const form = document.getElementById('add-form');
+    const input = document.getElementById('item');
+    const list = document.getElementById('items');
+    const count = document.getElementById('count');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const value = input.value.trim();
+      if (!value) return;
+      input.value = '';
+      // Simulated server latency: tests must rely on auto-waiting, not fixed delays.
+      setTimeout(() => {
+        const li = document.createElement('li');
+        li.textContent = value;
+        list.appendChild(li);
+        const n = list.children.length;
+        count.textContent = n + (n === 1 ? ' item' : ' items');
+      }, 300);
+    });
+  </script>
+</body>
+</html>

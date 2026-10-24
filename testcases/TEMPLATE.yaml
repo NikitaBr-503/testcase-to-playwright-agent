@@ -1,0 +1,18 @@
+# Шаблон ручного тест-кейсу (стаття, п. 4.3). Один файл = один тест-кейс.
+# Manual test case template. One file = one test case. Put it in testcases/<app>/<ID>.yaml.
+#
+# Назви елементів інтерфейсу пишіть у лапках «…» точно так, як вони відображаються на екрані.
+
+id: APP-01                 # unique ID; the file name should match it
+title: Короткий опис того, що перевіряється
+app: conduit               # optional: by default taken from the folder name
+complexity: null           # optional override: simple | medium | complex
+                           # (by default: ≤5 steps simple, 6–10 medium, >10 complex)
+preconditions:
+  - Стан системи перед виконанням тесту
+steps:
+  - Перший крок.
+  - Другий крок.
+expected:
+  - Очікуваний результат 1.
+  - Очікуваний результат 2.
