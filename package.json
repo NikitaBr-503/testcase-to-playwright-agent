@@ -1,0 +1,13 @@
+{
+  "name": "testcase-to-playwright-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LLM agent that converts manual test cases into executable Playwright tests",
+  "license": "MIT",
+  "scripts": {
+    "install-browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

@@ -1,0 +1,30 @@
+# Самоперевірка без витрат на API: фейкова модель повертає заготовлені відповіді,
+# тест-кейс виконується на маленькій локальній сторінці. Див. README, розділ «Самоперевірка».
+# Self-test without API costs: a fake model replays prepared answers against a tiny local page.
+
+experiment:
+  name: selftest
+  modes: [R1, R2, R3]
+  max_iterations: 5
+  repeats: 1
+  stability_runs: 3
+  testcases_dir: testcases/selftest
+
+playwright:
+  test_timeout_ms: 20000
+  action_timeout_ms: 3000
+  expect_timeout_ms: 2000
+
+models:
+  - id: fake
+    provider: fake
+    responses_dir: selftest/responses
+    vision: true
+
+apps:
+  selftest:
+    base_url: http://localhost:8765
+    start_path: /
+    reset_cmd: null
+    context: |
+      Static demo page served by `python3 -m http.server 8765 -d selftest/app`.
