@@ -11,6 +11,8 @@ blob-report/
 # Generated during experiments (kept out of git; final tests and logs are in results/)
 generated/
 results/*/work/
+results/pilot*/
+results/pilot1*/
 
 # Python
 __pycache__/

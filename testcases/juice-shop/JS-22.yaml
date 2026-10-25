@@ -1,0 +1,30 @@
+# Перевірено на OWASP Juice Shop 20.3.0 (назви елементів звірено з інтерфейсом).
+id: JS-22
+title: Зміна пароля новим користувачем
+preconditions:
+- Вітальне вікно і банер про cookies уже закриті (налаштування тестового середовища)
+- Користувач не увійшов до системи
+steps:
+- Відкрити головну сторінку.
+- Натиснути кнопку «Account» у верхній панелі.
+- Обрати пункт «Login».
+- Натиснути посилання «Not yet a customer?».
+- Ввести в поле «Email» нову адресу виду «pwd_change_<унікальне число>@example.com» (адреса має бути унікальною) і запам'ятати її.
+- Ввести в поле «Password» значення «OldPass123!».
+- Ввести в поле «Repeat Password» значення «OldPass123!».
+- У списку «Security Question» обрати «Your eldest siblings middle name?».
+- Ввести в поле «Answer» значення «Kyiv».
+- Натиснути кнопку «Register».
+- Ввести в поле «Email» сторінки «Login» зареєстровану адресу.
+- Ввести в поле «Password» значення «OldPass123!».
+- Натиснути кнопку «Log in».
+- Натиснути кнопку «Account» у верхній панелі.
+- Обрати пункт «Privacy & Security».
+- Обрати пункт «Change Password».
+- Ввести в поле «Current Password» значення «OldPass123!».
+- Ввести в поле «New Password» значення «NewPass456!».
+- Ввести в поле «Repeat New Password» значення «NewPass456!».
+- Натиснути кнопку «Change».
+expected:
+- Після реєстрації відображається повідомлення «Registration completed successfully. You can now log in.»
+- Після зміни пароля відображається повідомлення «Your password was successfully changed.»

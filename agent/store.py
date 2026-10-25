@@ -26,6 +26,8 @@ def read_runs(results_dir: Path) -> List[Dict]:
     for line in path.read_text(encoding="utf-8").splitlines():
         if line.strip():
             rec = json.loads(line)
+            if any(it.get("llm_error") for it in rec.get("iteration_details", [])):
+                continue  # API failure, not an experiment result (written by an older version)
             latest[key_of(rec)] = rec  # a re-run of the same combination replaces the old record
     return list(latest.values())
 

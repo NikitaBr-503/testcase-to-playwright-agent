@@ -38,6 +38,8 @@ class AppConfig:
     start_path: str = "/"
     reset_cmd: Optional[str] = None
     context: str = ""
+    snapshot_dismiss: List[str] = field(default_factory=list)  # buttons that close start-up dialogs
+    init_cookies: List[Dict[str, str]] = field(default_factory=list)  # test environment set-up, e.g. dismissed banners
 
     @property
     def start_url(self) -> str:
@@ -75,7 +77,8 @@ class Config:
 
 
 def load_dotenv(path: Path = ROOT / ".env") -> None:
-    """Minimal .env reader (KEY=VALUE lines); existing environment variables win."""
+    """Minimal .env reader (KEY=VALUE lines). Values from .env replace variables already set in the shell,
+    so the key used is always the one written in this project's .env."""
     if not path.exists():
         return
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -84,7 +87,7 @@ def load_dotenv(path: Path = ROOT / ".env") -> None:
             continue
         key, value = line.split("=", 1)
         key, value = key.strip(), value.strip().strip('"').strip("'")
-        if key and value and key not in os.environ:
+        if key and value:
             os.environ[key] = value
 
 
@@ -118,6 +121,8 @@ def load_config(path: str | Path) -> Config:
             start_path=a.get("start_path", "/"),
             reset_cmd=a.get("reset_cmd"),
             context=(a.get("context") or "").strip(),
+            snapshot_dismiss=[str(x) for x in (a.get("snapshot_dismiss") or [])],
+            init_cookies=[{"name": str(c["name"]), "value": str(c["value"])} for c in (a.get("init_cookies") or [])],
         )
 
     tc_dir = Path(exp.get("testcases_dir", "testcases"))

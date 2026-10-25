@@ -1,4 +1,5 @@
 id: ST-01
+app: selftest
 title: Додавання двох товарів до списку
 preconditions:
   - Список порожній

@@ -7,6 +7,23 @@
 
 Репозиторій: https://github.com/juice-shop/juice-shop
 
+### Без Docker (з вихідного коду)
+
+Потрібен Node.js версії 22–26 (перевірка: `node -v`). Клонуйте Juice Shop поза цим репозиторієм:
+
+```bash
+cd ..                                   # папка поруч із testcase-to-playwright-agent
+git clone --depth 1 https://github.com/juice-shop/juice-shop.git
+cd juice-shop
+git log -1 --format=%h                  # коміт – внести в табл. 2 статті
+node -p "require('./package.json').version"   # версія – внести в табл. 2
+npm install                             # 5–15 хвилин, лише перший раз
+npm start                               # вікно не закривати, поки йде експеримент
+# відкрити http://localhost:3000
+```
+
+### З Docker
+
 ```bash
 docker compose -f apps/docker-compose.yml up -d juice-shop
 # відкрити http://localhost:3000

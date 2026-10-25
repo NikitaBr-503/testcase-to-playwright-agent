@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List
 
 from .config import ROOT, Config, load_config, load_dotenv
-from .llm import make_client
+from .llm import LLMError, make_client
 from .loop import run_combination
 from .runner import npx, run_spec, start_page_snapshot
 from .store import append_run, done_keys, read_runs, write_summary
@@ -80,7 +80,7 @@ def cmd_check(cfg: Config, args) -> int:
     try:
         cases = _select_testcases(cfg, args)
         report(bool(cases), f"{len(cases)} test cases parsed from {cfg.testcases_dir.relative_to(ROOT)}")
-    except Exception as e:  # noqa: BLE001
+    except (Exception, SystemExit) as e:  # noqa: BLE001
         cases = []
         report(False, f"test cases: {e}")
     for app_id in sorted({c.app for c in cases}):
@@ -136,8 +136,14 @@ def cmd_run(cfg: Config, args) -> int:
 
     for n, (rep, model, mode, tc) in enumerate(plan, 1):
         print(f"[{n}/{len(plan)}] {model.id} {mode} rep{rep} {tc.id}")
-        rec = run_combination(cfg, model, clients[model.id], mode, rep, tc, cfg.apps[tc.app],
-                              snapshots.get(tc.app))
+        try:
+            rec = run_combination(cfg, model, clients[model.id], mode, rep, tc, cfg.apps[tc.app],
+                                  snapshots.get(tc.app))
+        except LLMError as e:
+            print(f"\nModel '{model.id}' did not answer: {e}\n"
+                  "Nothing was recorded for this combination. Fix the problem and run the same command again.")
+            write_summary(cfg.results_dir, read_runs(cfg.results_dir))
+            return 2
         append_run(cfg.results_dir, rec)
         verdict = "stable" if rec["stable"] else ("passed" if rec["passed"] else "failed")
         review = ", needs review" if rec["needs_review"] else ""

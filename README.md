@@ -137,7 +137,7 @@ python -m agent export-eval
 Виправлений тест можна запустити так:
 
 ```bash
-python -m agent exec generated/main/model1/R1/rep1/CON-07.spec.ts
+python -m agent exec generated/main/claude-sonnet-5.5/R1/rep1/JS-01.spec.ts
 ```
 
 `results/<назва>/baseline.csv` – час ручного написання тесту (`manual_time_min`) для M тест-кейсів

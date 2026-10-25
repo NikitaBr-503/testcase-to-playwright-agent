@@ -1,4 +1,5 @@
 id: ST-02
+app: selftest
 title: Додавання одного товару
 preconditions:
   - Список порожній
