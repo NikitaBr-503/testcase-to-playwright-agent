@@ -1,0 +1,13 @@
+model,mode,rep,tc_id,app,complexity,n_steps,original_spec,copy_to_fix,fixed_steps,fixed_expected,fix_time_min,failure_cause,notes
+deepseek-v4.1-flash,R3,1,JS-24,juice-shop,complex,20,generated/main/deepseek-v4.1-flash/R3/rep1/JS-24.spec.ts,results/main/fixes/deepseek-v4.1-flash/R3/rep1/JS-24.spec.ts,,,,,
+claude-sonnet-5.5,R1,1,JS-22,juice-shop,complex,20,generated/main/claude-sonnet-5.5/R1/rep1/JS-22.spec.ts,results/main/fixes/claude-sonnet-5.5/R1/rep1/JS-22.spec.ts,,,,,
+deepseek-v4.1-flash,R2,1,JS-15,juice-shop,medium,9,generated/main/deepseek-v4.1-flash/R2/rep1/JS-15.spec.ts,results/main/fixes/deepseek-v4.1-flash/R2/rep1/JS-15.spec.ts,,,,,
+deepseek-v4.1-flash,R2,1,JS-02,juice-shop,medium,7,generated/main/deepseek-v4.1-flash/R2/rep1/JS-02.spec.ts,results/main/fixes/deepseek-v4.1-flash/R2/rep1/JS-02.spec.ts,,,,,
+claude-sonnet-5.5,R1,1,JS-09,juice-shop,simple,3,generated/main/claude-sonnet-5.5/R1/rep1/JS-09.spec.ts,results/main/fixes/claude-sonnet-5.5/R1/rep1/JS-09.spec.ts,,,,,
+claude-sonnet-5.5,R1,1,JS-12,juice-shop,simple,4,generated/main/claude-sonnet-5.5/R1/rep1/JS-12.spec.ts,results/main/fixes/claude-sonnet-5.5/R1/rep1/JS-12.spec.ts,,,,,
+claude-sonnet-5.5,R1,1,TODO-19,todomvc,complex,11,generated/main/claude-sonnet-5.5/R1/rep1/TODO-19.spec.ts,results/main/fixes/claude-sonnet-5.5/R1/rep1/TODO-19.spec.ts,,,,,Replaces claude-sonnet-5.5/R1/TODO-20: TODO-20 is a baseline test case and the researcher saw its reference implementation. Drawn at random (seed 20261027) from the other failed rep1 TodoMVC complex tests of TODO-19 (no other complex test case failed).
+claude-sonnet-5.5,R2,1,TODO-19,todomvc,complex,11,generated/main/claude-sonnet-5.5/R2/rep1/TODO-19.spec.ts,results/main/fixes/claude-sonnet-5.5/R2/rep1/TODO-19.spec.ts,,,,,
+claude-sonnet-5.5,R1,1,TODO-13,todomvc,medium,6,generated/main/claude-sonnet-5.5/R1/rep1/TODO-13.spec.ts,results/main/fixes/claude-sonnet-5.5/R1/rep1/TODO-13.spec.ts,,,,,
+claude-sonnet-5.5,R1,1,TODO-17,todomvc,medium,7,generated/main/claude-sonnet-5.5/R1/rep1/TODO-17.spec.ts,results/main/fixes/claude-sonnet-5.5/R1/rep1/TODO-17.spec.ts,,,,,
+deepseek-v4.1-flash,R2,1,TODO-11,todomvc,simple,5,generated/main/deepseek-v4.1-flash/R2/rep1/TODO-11.spec.ts,results/main/fixes/deepseek-v4.1-flash/R2/rep1/TODO-11.spec.ts,,,,,
+claude-sonnet-5.5,R2,1,TODO-03,todomvc,simple,1,generated/main/claude-sonnet-5.5/R2/rep1/TODO-03.spec.ts,results/main/fixes/claude-sonnet-5.5/R2/rep1/TODO-03.spec.ts,,,,,

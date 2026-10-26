@@ -1,0 +1,21 @@
+import { test, expect } from '../../../../../support/fixtures';
+test('TODO-03 Порожнє завдання не додається', async ({ page }) => {
+  // Preconditions
+  await page.goto('/');
+  await expect(page.getByRole('textbox', { name: 'New Todo Input' })).toBeVisible();
+  await expect(page.getByRole('listitem')).toHaveCount(0);
+
+  // Step 1
+  const newTodoInput = page.getByRole('textbox', { name: 'New Todo Input' });
+  await newTodoInput.fill('   ');
+  await newTodoInput.press('Enter');
+
+  // Expected 1
+  await expect(page.getByRole('listitem')).toHaveCount(0);
+
+  // Expected 2
+  await expect(page.getByText(/items? left/)).toHaveCount(0);
+  await expect(page.getByText('All', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Active', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Completed', { exact: true })).toHaveCount(0);
+});

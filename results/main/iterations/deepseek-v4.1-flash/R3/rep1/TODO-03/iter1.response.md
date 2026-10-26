@@ -1,0 +1,23 @@
+```ts
+import { test, expect } from '@playwright/test';
+
+test('TODO-03 Порожнє завдання не додається', async ({ page }) => {
+  // Preconditions
+  await page.goto('/');
+  await expect(page.getByRole('listitem')).toHaveCount(0);
+
+  // Step 1
+  const newTodoInput = page.getByPlaceholder('What needs to be done?');
+  await newTodoInput.fill('   ');
+  await newTodoInput.press('Enter');
+
+  // Expected 1
+  await expect(page.getByRole('listitem')).toHaveCount(0);
+
+  // Expected 2
+  await expect(page.getByText(/items? left/i)).toBeHidden();
+  await expect(page.getByRole('link', { name: 'All', exact: true })).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Active', exact: true })).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Completed', exact: true })).toBeHidden();
+});
+```

@@ -1,0 +1,31 @@
+import { test, expect } from '../../../../../support/fixtures';
+test('TODO-02 Додавання трьох завдань', async ({ page }) => {
+  // Preconditions
+  await page.goto('/');
+  const newTodoInput = page.getByPlaceholder('What needs to be done?');
+  await expect(newTodoInput).toBeVisible();
+  await expect(page.getByRole('listitem')).toHaveCount(0);
+
+  // Step 1
+  await newTodoInput.fill('Купити молоко');
+  await newTodoInput.press('Enter');
+
+  // Step 2
+  await newTodoInput.fill('Написати статтю');
+  await newTodoInput.press('Enter');
+
+  // Step 3
+  await newTodoInput.fill('Подзвонити керівнику');
+  await newTodoInput.press('Enter');
+
+  // Expected 1
+  const todoItems = page.getByRole('listitem');
+  await expect(todoItems).toHaveText([
+    'Купити молоко',
+    'Написати статтю',
+    'Подзвонити керівнику',
+  ]);
+
+  // Expected 2
+  await expect(page.getByText('3 items left!', { exact: true })).toBeVisible();
+});
