@@ -1,5 +1,5 @@
 # Конфігурація основного експерименту.
-# Experiment configuration. Values marked TODO must be filled in before the run.
+# Experiment configuration.
 
 experiment:
   name: main                 # results go to results/<name>/

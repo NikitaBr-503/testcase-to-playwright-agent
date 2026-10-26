@@ -39,6 +39,7 @@ COMPLEXITY_UA = {"simple": "Прості", "medium": "Середні", "complex"
 MODES = ["R1", "R2", "R3"]
 # Ordinal single-hue ramp: R1 → R3 = lighter → darker (also readable in grayscale print).
 MODE_COLORS = {"R1": "#9ec5f4", "R2": "#3987e5", "R3": "#184f95"}
+MODEL_TITLES = {"claude-sonnet-5.5": "Claude Sonnet 5.5", "deepseek-v4.1-flash": "DeepSeek V4.1 Flash"}
 CAUSES = ["locator", "order", "sync", "ambiguity", "hallucination", "weak_assert", "other"]
 CAUSES_UA = {
     "locator": "Неправильний локатор", "order": "Порушення послідовності дій",
@@ -99,11 +100,17 @@ def load(cfg):
     if path.exists():
         ev = pd.read_csv(path, dtype=str, keep_default_na=False)
         ev["rep"] = ev["rep"].astype(int)
+        for c in ("fixed_expected", "evaluator"):
+            if c not in ev.columns:
+                ev[c] = ""
         cols = ["model", "mode", "rep", "tc_id", "steps_ok", "asserts_ok", "fixed_steps",
-                "fix_time_min", "failure_cause"]
+                "fix_time_min", "failure_cause", "fixed_expected", "evaluator"]
         runs = runs.merge(ev[cols], on=["model", "mode", "rep", "tc_id"], how="left")
+        for c in cols[4:]:
+            runs[c] = runs[c].fillna("")
     else:
-        for c in ("steps_ok", "asserts_ok", "fixed_steps", "fix_time_min", "failure_cause"):
+        for c in ("steps_ok", "asserts_ok", "fixed_steps", "fix_time_min", "failure_cause",
+                  "fixed_expected", "evaluator"):
             runs[c] = ""
     base_path = cfg.results_dir / "baseline.csv"
     baseline = pd.read_csv(base_path, dtype=str, keep_default_na=False) if base_path.exists() else pd.DataFrame(
@@ -201,7 +208,7 @@ def main(argv=None) -> int:
         ax.set_yticks(range(0, 101, 20))
         ax.set_xlabel("Клас складності тест-кейсу", labelpad=8)
         if len(models) > 1:
-            ax.set_title(model)
+            ax.set_title(MODEL_TITLES.get(model, model))
         ax.spines[["top", "right"]].set_visible(False)
         ax.yaxis.grid(True, color="#e5e5e5", linewidth=0.6)
         ax.set_axisbelow(True)
@@ -231,8 +238,21 @@ def main(argv=None) -> int:
     r1 = runs[runs["rep"] == args.rep].copy()
     r1["fixed_n"] = [_fixed_steps(v, n) for v, n in zip(r1["fixed_steps"], r1["n_steps"])]
     r1.loc[r1["success"] == 1, "fixed_n"] = r1.loc[r1["success"] == 1, "fixed_n"].fillna(0)
+    r1["fixed_exp_n"] = [_fixed_steps(v, n) for v, n in zip(r1["fixed_expected"], r1["n_expected"])]
+    r1.loc[r1["success"] == 1, "fixed_exp_n"] = r1.loc[r1["success"] == 1, "fixed_exp_n"].fillna(0)
     r1["t_fix"] = r1["fix_time_min"].map(_num)
     r1.loc[r1["success"] == 1, "t_fix"] = r1.loc[r1["success"] == 1, "t_fix"].fillna(0)
+    # Fixes whose time was not measured (e.g. made by the assistant, not timed by the researcher) get the mean
+    # time of the researcher's timed fixes of the same complexity class (article, 4.8).
+    failed = r1["success"] == 0
+    timed = r1[failed & r1["t_fix"].notna()]
+    untimed = failed & r1["t_fix"].isna() & r1["fixed_n"].notna()
+    if len(timed) and untimed.any():
+        by_cx = timed.groupby("complexity")["t_fix"].mean()
+        r1.loc[untimed, "t_fix"] = r1.loc[untimed, "complexity"].map(by_cx).fillna(timed["t_fix"].mean())
+        notes.append(f"ESTIMATED: fix time of {int(untimed.sum())} fixed test(s) taken as the mean of "
+                     f"{len(timed)} timed fix(es) of the same complexity class "
+                     f"({', '.join(f'{k}: {v:.1f} min' for k, v in by_cx.items())}).")
     r1["t_gen"] = r1["agent_seconds"] / 60
     r1["t_prep"] = r1["t_gen"] + r1["t_fix"]
     missing_fix = int(r1["fixed_n"].isna().sum() + r1["t_fix"].isna().sum())
@@ -249,6 +269,7 @@ def main(argv=None) -> int:
         rows6.append({
             "model": model, "mode": mode,
             "MFR_%": 100 * g["fixed_n"].sum() / g["n_steps"].sum(),
+            "fixed_expected_%": 100 * g["fixed_exp_n"].sum() / g["n_expected"].sum(),
             "t_gen_min": g["t_gen"].mean(), "t_fix_min": g["t_fix"].mean(), "t_prep_min": g["t_prep"].mean(),
             "E_%": 100 * (t_man_b - t_prep_b) / t_man_b if t_man_b and not math.isnan(t_man_b) else float("nan"),
             "baseline_cases": len(gb), "tokens_k": (g["input_tokens"] + g["output_tokens"]).mean() / 1000,

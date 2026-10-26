@@ -18,7 +18,9 @@ from .testcase import TestCase, load_testcases
 EVAL_FIELDS = ["model", "mode", "rep", "tc_id", "app", "complexity", "n_steps", "n_expected",
                "auto_passed", "auto_stable", "needs_review", "final_flags", "final_spec",
                # filled in by the researcher (article, section 4.7):
-               "steps_ok", "asserts_ok", "fixed_steps", "fix_time_min", "failure_cause", "notes"]
+               "steps_ok", "asserts_ok", "fixed_steps", "fix_time_min", "failure_cause",
+               # who made the assessment / fix (researcher | claude) and where the fixed test is
+               "fixed_expected", "evaluator", "fixed_spec", "notes"]
 MANUAL_FIELDS = EVAL_FIELDS[EVAL_FIELDS.index("steps_ok"):]
 FAILURE_CAUSES = "locator | order | sync | ambiguity | hallucination | weak_assert | other"
 

@@ -5,7 +5,7 @@
 
 id: APP-01                 # unique ID; the file name should match it
 title: Короткий опис того, що перевіряється
-app: conduit               # optional: by default taken from the folder name
+app: juice-shop            # optional: by default taken from the folder name
 complexity: null           # optional override: simple | medium | complex
                            # (by default: ≤5 steps simple, 6–10 medium, >10 complex)
 preconditions:
