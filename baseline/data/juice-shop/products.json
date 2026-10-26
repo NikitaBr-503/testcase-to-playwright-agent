@@ -1,0 +1,5 @@
+{
+  "missingSearchTerm": "zzzz",
+  "bananaJuice": { "name": "Banana Juice (1000ml)", "price": "1.99¤" },
+  "appleJuice": { "name": "Apple Juice (1000ml)", "unitPrice": 1.99 }
+}

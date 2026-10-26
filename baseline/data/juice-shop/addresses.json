@@ -1,0 +1,11 @@
+{
+  "kyiv": {
+    "country": "Ukraine",
+    "name": "QA User",
+    "mobile": "5012345678",
+    "zip": "01001",
+    "street": "Khreshchatyk 1",
+    "city": "Kyiv",
+    "state": "Kyiv"
+  }
+}

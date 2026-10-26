@@ -1,0 +1,16 @@
+{
+  "registered": {
+    "email": "qa_user@example.com",
+    "password": "QaPassword123!",
+    "securityQuestionId": 1,
+    "securityAnswer": "Kyiv"
+  },
+  "passwordChange": {
+    "emailPrefix": "pwd_change_",
+    "emailDomain": "example.com",
+    "oldPassword": "OldPass123!",
+    "newPassword": "NewPass456!",
+    "securityQuestion": "Your eldest siblings middle name?",
+    "securityAnswer": "Kyiv"
+  }
+}
