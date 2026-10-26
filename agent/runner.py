@@ -79,6 +79,7 @@ def run_spec(spec: Path, app: AppConfig, cfg: Config, out_dir: Path, repeat_each
         "AGENT_TEST_TIMEOUT_MS": str(cfg.test_timeout_ms),
         "AGENT_ACTION_TIMEOUT_MS": str(cfg.action_timeout_ms),
         "AGENT_EXPECT_TIMEOUT_MS": str(cfg.expect_timeout_ms),
+        "AGENT_INIT_COOKIES": json.dumps(app.init_cookies),
         "PLAYWRIGHT_JSON_OUTPUT_FILE": str(report),
         "PLAYWRIGHT_JSON_OUTPUT_NAME": str(report),
         "FORCE_COLOR": "0",
@@ -141,8 +142,9 @@ def start_page_snapshot(app: AppConfig) -> str:
     node = shutil.which("node")
     if not node:
         raise RuntimeError("node not found: install Node.js 18+")
-    proc = subprocess.run([node, "scripts/aria_snapshot.mjs", app.start_url],
-                          cwd=ROOT, capture_output=True, text=True, timeout=120)
+    env = {**os.environ, "AGENT_INIT_COOKIES": json.dumps(app.init_cookies)}
+    proc = subprocess.run([node, "scripts/aria_snapshot.mjs", app.start_url, *app.snapshot_dismiss],
+                          cwd=ROOT, env=env, capture_output=True, text=True, timeout=120)
     if proc.returncode != 0:
         raise RuntimeError(f"Cannot take a snapshot of {app.start_url}:\n{strip_ansi(proc.stderr)[-2000:]}")
     return proc.stdout

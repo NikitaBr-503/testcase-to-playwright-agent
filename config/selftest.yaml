@@ -8,7 +8,7 @@ experiment:
   max_iterations: 5
   repeats: 1
   stability_runs: 3
-  testcases_dir: testcases/selftest
+  testcases_dir: selftest/testcases
 
 playwright:
   test_timeout_ms: 20000

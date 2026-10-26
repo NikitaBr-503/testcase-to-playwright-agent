@@ -1,0 +1,8 @@
+model,mode,rep,tc_id,assistant,researcher_blind,final,decision
+claude-sonnet-5.5,R3,1,JS-05,1/0,1/1,1/0,after discussion the researcher agreed: expected result is checked weakly (see notes in manual_eval.csv)
+claude-sonnet-5.5,R3,2,JS-05,1/0,1/1,1/0,after discussion the researcher agreed: expected result is checked weakly (see notes in manual_eval.csv)
+claude-sonnet-5.5,R3,1,JS-25,1/0,1/1,1/0,after discussion the researcher agreed: expected result is checked weakly (see notes in manual_eval.csv)
+claude-sonnet-5.5,R3,3,JS-25,1/0,1/1,1/0,after discussion the researcher agreed: expected result is checked weakly (see notes in manual_eval.csv)
+deepseek-v4.1-flash,R1,1,TODO-04,1/0,1/1,1/0,after discussion the researcher agreed: expected result is checked weakly (see notes in manual_eval.csv)
+deepseek-v4.1-flash,R2,2,TODO-04,1/0,1/1,1/0,after discussion the researcher agreed: expected result is checked weakly (see notes in manual_eval.csv)
+deepseek-v4.1-flash,R1,3,TODO-16,1/0,1/1,1/0,after discussion the researcher agreed: expected result is checked weakly (see notes in manual_eval.csv)

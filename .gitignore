@@ -8,9 +8,11 @@ playwright-report/
 blob-report/
 .cache/
 
-# Generated during experiments (kept out of git; final tests and logs are in results/)
-generated/
+# Generated during experiments: only the final tests of the main experiment are published
+generated/*
+!generated/main/
 results/*/work/
+results/pilot*/
 
 # Python
 __pycache__/
@@ -23,4 +25,4 @@ venv/
 
 # Local self-test and scratch experiments
 results/selftest/
-results/layoutcheck/
+

@@ -1,0 +1,6 @@
+{
+  "noResults": "No results found",
+  "addressAdded": "The address at {city} has been successfully added to your addresses.",
+  "registrationCompleted": "Registration completed successfully. You can now log in.",
+  "passwordChanged": "Your password was successfully changed."
+}

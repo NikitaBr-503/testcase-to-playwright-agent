@@ -1,5 +1,5 @@
 # Конфігурація основного експерименту.
-# Experiment configuration. Values marked TODO must be filled in before the run.
+# Experiment configuration.
 
 experiment:
   name: main                 # results go to results/<name>/
@@ -15,45 +15,47 @@ playwright:
   expect_timeout_ms: 5000
 
 models:
-  # TODO: choose two models (article, section 4.6) and put the exact model IDs here.
-  - id: model1                     # short name used in results and tables
-    provider: anthropic            # anthropic | openai_compatible | fake
-    model: TODO-model-id
-    api_key_env: ANTHROPIC_API_KEY
+  # Both models are called through OpenRouter (one key: OPENROUTER_API_KEY). Article, section 4.6.
+  # Prices checked on openrouter.ai on 2026-10-25 (USD per 1M tokens, input / output).
+  - id: claude-sonnet-5.5          # commercial model, $2 / $10
+    provider: openai_compatible
+    base_url: https://openrouter.ai/api/v1
+    model: anthropic/claude-sonnet-5.5
+    api_key_env: OPENROUTER_API_KEY
     temperature: 0
-    max_tokens: 8000
+    max_tokens: 32000               # a ceiling only; reasoning models need room before the answer
     vision: true                   # send the failure screenshot in mode R3
-  - id: model2
-    provider: openai_compatible    # OpenAI, OpenRouter, Ollama, vLLM, LM Studio …
-    base_url: https://openrouter.ai/api/v1   # for Ollama: http://localhost:11434/v1
-    model: TODO-model-id
-    api_key_env: OPENROUTER_API_KEY          # leave empty for a local server without a key
+  - id: deepseek-v4.1-flash        # open-weight model (deepseek-ai/DeepSeek-V4.1-Flash-1017 on Hugging Face), $0.15 / $0.60
+    provider: openai_compatible
+    base_url: https://openrouter.ai/api/v1
+    model: deepseek/deepseek-v4.1-flash-1017
+    api_key_env: OPENROUTER_API_KEY
     temperature: 0
-    max_tokens: 8000
-    vision: false
+    max_tokens: 32000               # a ceiling only; reasoning models need room before the answer
+    vision: true
 
 apps:
   # base_url – where the application runs locally (see apps/README.md)
   # reset_cmd – shell command that restores the initial data before every test run (optional)
   # context – facts a tester would know: test accounts, seed data. Passed to the model.
   todomvc:
-    base_url: http://localhost:8080          # TODO: check after deployment
+    base_url: http://localhost:7002          # TodoMVC, examples/react, commit ff43b02 (`npm run serve`)
     start_path: /
-    reset_cmd: null
+    reset_cmd: null                          # todos are not persisted: every test starts with an empty list
     context: |
-      The application keeps its data in the browser's localStorage, so every test starts with an empty list.
-  conduit:
-    base_url: http://localhost:4100          # TODO: check after deployment
-    start_path: /
-    reset_cmd: null                          # TODO: e.g. a script that recreates the database
-    context: |
-      Registered test user (create it once before the experiment):
-      username: qa_user, email: qa_user@example.com, password: QaPassword123
+      The application does not persist todos, so every test starts with an empty list.
   juice-shop:
-    base_url: http://localhost:3000
+    base_url: http://localhost:3000            # OWASP Juice Shop 20.3.0, `npm start`
     start_path: /
-    reset_cmd: docker compose -f apps/docker-compose.yml restart juice-shop && sleep 15
+    reset_cmd: python3 apps/juice_shop_reset.py   # creates the test user if missing, empties its basket
+    # Test environment set-up (the same for every mode): the welcome dialog and the cookie banner are
+    # already dismissed, as in a returning user's browser. Without it every test starts with two modal
+    # dialogs that hide the page, and this single quirk decides the outcome of most one-shot tests.
+    init_cookies:
+      - {name: welcomebanner_status, value: dismiss}
+      - {name: cookieconsent_status, value: dismiss}
     context: |
-      On the first visit the application shows a welcome dialog and a cookie banner; they must be dismissed.
-      Registered test user (create it once before the experiment):
-      email: qa_user@example.com, password: QaPassword123!, security answer: Kyiv
+      The welcome dialog and the cookie banner are already dismissed by the test environment.
+      Registered test user: email qa_user@example.com, password QaPassword123!,
+      security question "Your eldest siblings middle name?", answer Kyiv.
+      Prices are shown with the currency sign ¤, for example 1.99¤.

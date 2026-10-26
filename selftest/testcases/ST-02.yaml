@@ -1,0 +1,11 @@
+id: ST-02
+app: selftest
+title: Додавання одного товару
+preconditions:
+  - Список порожній
+steps:
+  - Ввести в поле «New item» текст «Milk».
+  - Натиснути кнопку «Add».
+expected:
+  - Список «Items» містить «Milk».
+  - Лічильник показує «1 item».

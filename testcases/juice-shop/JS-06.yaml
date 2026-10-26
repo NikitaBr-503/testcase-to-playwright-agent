@@ -1,0 +1,20 @@
+# Перевірено на OWASP Juice Shop 20.3.0 (назви елементів звірено з інтерфейсом).
+id: JS-06
+title: Реєстрація нового користувача
+preconditions:
+  - Вітальне вікно і банер про cookies уже закриті (налаштування тестового середовища)
+  - Користувач не увійшов до системи
+steps:
+  - Відкрити головну сторінку.
+  - Натиснути кнопку «Account» у верхній панелі.
+  - Обрати пункт «Login».
+  - Натиснути посилання «Not yet a customer?».
+  - Ввести в поле «Email» нову адресу виду «new_user_<унікальне число>@example.com» (адреса має бути унікальною).
+  - Ввести в поле «Password» значення «NewUser123!».
+  - Ввести в поле «Repeat Password» значення «NewUser123!».
+  - У списку «Security Question» обрати «Your eldest siblings middle name?».
+  - Ввести в поле «Answer» значення «Kyiv».
+  - Натиснути кнопку «Register».
+expected:
+  - Відображається повідомлення «Registration completed successfully. You can now log in.»
+  - Відкрилася сторінка входу із заголовком «Login».

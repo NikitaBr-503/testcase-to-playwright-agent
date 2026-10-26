@@ -32,19 +32,24 @@ agent/              код агента (Python, лише стандартна �
   runner.py         запуск Playwright і збирання зворотного зв'язку
   code.py           вилучення коду, контроль перевірок, прив'язка помилки до кроку
   prompts.py        складання запитів із шаблонів у prompts/
+  fixdiff.py        які кроки й очікувані результати змінено під час ручного виправлення
 analysis/analyze.py розрахунок табл. 3–7 і рис. 2 статті
+analysis/agreement.py узгодженість первинної оцінки і сліпої перевірки (п. 5.3)
+baseline/           еталонна реалізація 10 тест-кейсів базової лінії (Page Object)
 config/             experiment.yaml (основний експеримент), selftest.yaml (самоперевірка)
+scripts/            знімок дерева доступності, перевірка і дебаг виправлених тестів
 prompts/            тексти інструкцій для моделей (додаток до статті)
 support/fixtures.ts фікстура, що зберігає знімок екрана і дерево доступності при невдачі
 testcases/          ручні тест-кейси у форматі YAML (див. TEMPLATE.yaml)
 apps/               як запустити застосунки, що тестуються
 selftest/           маленька сторінка і заготовлені відповіді для самоперевірки
-results/            результати експериментів (створюється під час роботи)
+generated/main/     остаточний код кожного згенерованого тесту (810 файлів)
+results/main/       дані експерименту: журнали, ітерації, ручна оцінка, виправлені тести, таблиці
 ```
 
 ## Встановлення
 
-Потрібні Node.js 18+, Python 3.9+ і Docker (для застосунків).
+Потрібні Node.js 22+ і Python 3.9+ (у експерименті: Node.js 24, Python 3.12, Playwright 1.64.1).
 
 ```bash
 npm install
@@ -82,7 +87,7 @@ python -m agent --config config/selftest.yaml run
 
 ## Проведення експерименту
 
-1. Запустіть застосунки (`apps/README.md`) і впишіть їхні адреси та версії в `config/experiment.yaml`.
+1. Запустіть застосунки (`apps/README.md`) і за потреби змініть їхні адреси в `config/experiment.yaml`.
 2. Вкажіть моделі в розділі `models` того самого файлу.
 3. Опишіть тест-кейси в `testcases/<застосунок>/<ID>.yaml` за шаблоном `testcases/TEMPLATE.yaml`
    і перевірте кожен вручну на застосунку.
@@ -96,7 +101,7 @@ python -m agent --config config/selftest.yaml run
 5. Спершу пілот на кількох тест-кейсах і одній моделі:
 
    ```bash
-   python -m agent run --testcases CON-07,TODO-01 --models model1 --repeats 1
+   python -m agent run --testcases JS-01,TODO-01 --models claude-sonnet-5.5 --repeats 1
    ```
 
 6. Повний експеримент. Уже виконані комбінації пропускаються, тому запуск можна переривати й
@@ -130,18 +135,53 @@ python -m agent export-eval
 | `fixed_steps` | номери кроків, код яких довелося змінити, через `;` (наприклад `2;5`), `all` або `0` |
 | `fix_time_min` | скільки хвилин зайняло виправлення |
 | `failure_cause` | основна причина невдачі: `locator`, `order`, `sync`, `ambiguity`, `hallucination`, `weak_assert`, `other` |
+| `fixed_expected` | номери очікуваних результатів, перевірку яких довелося змінити, через `;`, або `0` |
+| `evaluator` | хто оцінив або виправив тест: `researcher` або `claude` |
+| `fixed_spec` | шлях до виправленого тесту в `results/<назва>/fixes/` |
 
 Успіх і `steps_ok`/`asserts_ok` оцінюються для всіх повторень. Виправлення, час і причину
 невдачі заповнюйте лише для повторення 1 (`rep = 1`).
 
-Виправлений тест можна запустити так:
+### Як оцінено експеримент `main`
+
+- `manual_eval.csv` уже заповнено: первинну оцінку всіх стабільних тестів і виправлення
+  неуспішних тестів повторення 1 виконав Claude Opus 5.5 (`evaluator = claude`).
+  Виправлені тести лежать у `results/main/fixes/<модель>/<режим>/rep1/`, а змінені кроки
+  (`fixed_steps`, `fixed_expected`) обчислено за різницею з початковим кодом.
+- `blind_check.csv` – незалежна перевірка дослідником: 40 випадково обраних стабільних тестів
+  (вибірку зроблено до оцінювання) і всі тести, які Claude визнав неуспішними. Рядки перемішано.
+  Заповніть `steps_ok`, `asserts_ok` (1/0) і за потреби `comment`, **не відкриваючи**
+  `manual_eval.csv`. Потім:
+
+  ```bash
+  python analysis/agreement.py
+  ```
+
+- `timed_fixes.csv` – 12 неуспішних тестів, які дослідник виправляє сам із секундоміром.
+  Початковий код уже скопійовано у файли зі стовпця `copy_to_fix`. Виправте файл, перевірте
+  його командою нижче і впишіть `fixed_steps`, `fixed_expected`, `fix_time_min` і
+  `failure_cause` у відповідний рядок `manual_eval.csv` (`evaluator = researcher`).
+  Для решти виправлень час оцінюється як середній час виправлень дослідника того самого класу складності.
+- `baseline.csv` – час ручної автоматизації (`manual_time_min`) для 10 тест-кейсів з
+  позначкою `in_baseline = 1`; це експертна оцінка автора (`time_source = expert_estimate`), див. нижче.
+
+- `adjudication.csv` – остаточне рішення щодо 7 розбіжностей між первинною оцінкою і сліпою перевіркою
+  (після обговорення дослідник погодився з відхиленнями; сліпі оцінки в `blind_check.csv` не змінювались).
+
+Запустити один виправлений тест у режимі дебагу (той самий набір cookies і скидання даних, що й в агента):
 
 ```bash
-python -m agent exec generated/main/model1/R1/rep1/CON-07.spec.ts
+python scripts/debug_fix.py results/main/fixes/<модель>/<режим>/rep1/<TC>.spec.ts [--headed | --slow 500 | --ui]
 ```
 
-`results/<назва>/baseline.csv` – час ручного написання тесту (`manual_time_min`) для M тест-кейсів
-базової лінії. Пишіть ці тести до того, як подивитеся на згенеровані тести для цих тест-кейсів.
+Перевірити виправлені тести (кожен запускається тричі, обидва застосунки мають працювати):
+
+```bash
+python scripts/verify_fixes.py                 # усі виправлені тести
+python scripts/verify_fixes.py --only JS-24    # лише один тест-кейс
+```
+
+Результат – `results/main/fixes/verify_report.csv`.
 
 ## Аналіз
 
@@ -170,3 +210,13 @@ snapshot of the page at the moment of failure. Static checks flag tests in which
 removed or weakened. Model clients use only the Python standard library (Anthropic Messages API and
 any OpenAI-compatible endpoint). Run `python -m agent --help` for commands and
 `python analysis/analyze.py` to compute the article's tables and figure.
+
+## Базова лінія (t_руч)
+
+* `results/main/baseline.csv`, колонка `manual_time_min` – час ручної автоматизації для 10 тест-кейсів
+  базової лінії (`in_baseline = 1`). Колонка `time_source = expert_estimate`: це експертна оцінка автора
+  (середній час за досвідом автоматизації подібних вебзастосунків для тестів з Page Object, даними в
+  окремих файлах і підготовкою даних через API), а не вимірювання. Значення округлено до хвилин.
+* `baseline/` – еталонна реалізація цих 10 тест-кейсів за тими самими практиками. Її написав
+  ШІ-асистент (Claude) і перевірив автор; час її написання не є джерелом t_руч. Запуск:
+  `npx playwright test -c baseline/playwright.config.ts --repeat-each 3`.

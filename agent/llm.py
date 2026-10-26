@@ -27,6 +27,7 @@ class LLMResult:
     input_tokens: int
     output_tokens: int
     seconds: float
+    finish_reason: str = ""   # "length" = the answer was cut off at max_tokens
 
 
 @dataclass
@@ -103,7 +104,9 @@ class AnthropicClient(LLMClient):
         seconds = time.monotonic() - t0
         text = "".join(b.get("text", "") for b in resp.get("content", []) if b.get("type") == "text")
         usage = resp.get("usage", {})
-        return LLMResult(text, int(usage.get("input_tokens", 0)), int(usage.get("output_tokens", 0)), seconds)
+        stop = resp.get("stop_reason") or ""
+        return LLMResult(text, int(usage.get("input_tokens", 0)), int(usage.get("output_tokens", 0)), seconds,
+                         "length" if stop == "max_tokens" else stop)
 
 
 class OpenAICompatibleClient(LLMClient):
@@ -130,12 +133,14 @@ class OpenAICompatibleClient(LLMClient):
         seconds = time.monotonic() - t0
         try:
             text = resp["choices"][0]["message"]["content"] or ""
+            finish = resp["choices"][0].get("finish_reason") or ""
         except (KeyError, IndexError):
             raise LLMError(f"Unexpected response: {json.dumps(resp)[:1000]}") from None
         if isinstance(text, list):  # some servers return content parts
             text = "".join(p.get("text", "") for p in text if isinstance(p, dict))
         usage = resp.get("usage") or {}
-        return LLMResult(text, int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0)), seconds)
+        return LLMResult(text, int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0)), seconds,
+                         finish)
 
 
 class FakeClient(LLMClient):

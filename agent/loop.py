@@ -15,7 +15,7 @@ from typing import Dict, Optional
 
 from . import code as codeutil
 from .config import ROOT, AppConfig, Config, ModelConfig
-from .llm import LLMClient, LLMError, load_image
+from .llm import LLMClient, LLMError, load_image  # noqa: F401
 from .prompts import Feedback, system_prompt, user_prompt
 from .runner import reset_app, run_spec
 from .testcase import TestCase
@@ -58,19 +58,21 @@ def run_combination(cfg: Config, model: ModelConfig, client: LLMClient, mode: st
         try:
             res = client.complete(system, user, [im for im in images if im],
                                   context={"tc_id": tc.id, "mode": mode, "iteration": i})
-        except LLMError as e:
-            iterations.append({"iteration": i, "llm_error": str(e)[:2000]})
-            _log(f"  {key} iter{i}: model error: {str(e)[:200]}")
-            break
+        except LLMError:
+            # API problems (wrong key, no credits, network) are not results of the experiment:
+            # nothing is recorded and the run stops, so the combination is repeated next time.
+            raise
         (archive / f"iter{i}.response.md").write_text(res.text, encoding="utf-8")
         it = {"iteration": i, "llm_seconds": round(res.seconds, 2),
-              "input_tokens": res.input_tokens, "output_tokens": res.output_tokens}
+              "input_tokens": res.input_tokens, "output_tokens": res.output_tokens,
+              "finish_reason": res.finish_reason}
 
         raw_code = codeutil.extract_code(res.text)
         if raw_code is None:
-            it.update(passed=False, status="no_code", flags=["no_code"])
+            truncated = res.finish_reason == "length"
+            it.update(passed=False, status="no_code", flags=["no_code"] + (["truncated"] if truncated else []))
             iterations.append(it)
-            _log(f"  {key} iter{i}: answer has no code block")
+            _log(f"  {key} iter{i}: answer has no code block" + (" (cut off at max_tokens)" if truncated else ""))
             feedback = Feedback(previous_code=res.text[:4000], run=None, failed_marker=None,
                                 note="Your answer did not contain a ```ts code block with the test file.")
             continue
